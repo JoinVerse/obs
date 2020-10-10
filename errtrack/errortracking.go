@@ -61,9 +61,15 @@ func New(config Config) *ErrorTracker {
 
 // CaptureError send error to all other error trackers.
 func (et *ErrorTracker) CaptureError(err error, tags map[string]string) {
-	//user := et.buildErrorTrackingUser(r)
 	for _, et := range et.errorExporters {
 		et.CaptureError(err, tags)
+	}
+}
+
+// CaptureHttpError send error to all other error trackers.
+func (et *ErrorTracker) CaptureHttpError(err error, r *http.Request, tags map[string]string) {
+	for _, et := range et.errorExporters {
+		et.CaptureHttpError(err, r, tags)
 	}
 }
 

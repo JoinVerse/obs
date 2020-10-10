@@ -43,7 +43,7 @@ import (
 )
 
 func main() {
-	conf := errortracking.Config{
+	conf := errtrack.Config{
 		ServiceName:     "",
 		ServiceVersion:  "",
 		SentryDSN:       "",
@@ -51,7 +51,7 @@ func main() {
 		GCloudProjectID: "",
 	}
 
-	errorTracker := errortracking.New(conf)
+	errorTracker := errtrack.New(conf)
 	defer errorTracker.Close()
 
 	err := fmt.Errorf("main: ups, that was an error")
@@ -74,7 +74,7 @@ import (
 )
 
 func main() {
-	conf := errortracking.Config{
+	conf := errtrack.Config{
 		ServiceName:     "",
 		ServiceVersion:  "",
 		SentryDSN:       "",
@@ -90,3 +90,11 @@ func main() {
 	observer.Log.Error("main: ouch", err)
 }
 ```
+
+
+## net/http
+
+This module also provides functionality to be used with `net/http`. See how to use it [here](github.com/JoinVerse/obs/examples/http/main.go)
+
+- `errtrack.CaptureHttpError` capture requests information along with the user id if `X-User-ID` header has being set.
+- `htop.Logger` is a middleware that logs end of each request, along with some useful data about what was requested, what the response status was, and how long it took to return.

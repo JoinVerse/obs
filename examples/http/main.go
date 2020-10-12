@@ -11,11 +11,9 @@ import (
 
 func main() {
 	conf := errtrack.Config{
-		ServiceName:     "",
+		ServiceName:     "example",
 		ServiceVersion:  "",
 		SentryDSN:       "",
-		GCloudEnabled:   false,
-		GCloudProjectID: "",
 	}
 
 	observer := obs.New(conf)

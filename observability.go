@@ -5,6 +5,13 @@ import (
 	"github.com/JoinVerse/obs/errtrack"
 )
 
+type Config struct {
+	GCloudConfig errtrack.GoogleCloudErrorReportingConfig
+	//When true, GCP integration is disabled.
+	NOGCloudEnabled bool
+	SentryConfig    errtrack.SentryConfig
+}
+
 // Observer provides observer object
 type Observer struct {
 	Log *Logger
@@ -12,15 +19,24 @@ type Observer struct {
 }
 
 // New returns a new observer.
-func New(errConfig errtrack.Config) Observer {
-	obs :=  Observer{Log: NewLogger(), ErrorTracker: errtrack.New(errConfig)}
-
-	if err := profiler.Start(profiler.Config{
-		Service:        errConfig.ServiceName,
-		ServiceVersion: errConfig.ServiceVersion,
-	}); err != nil {
-		obs.Log.Error("obs: cannot start profiling", err)
-		obs.CaptureError(err, nil)
+func New(config Config) Observer {
+	log := NewLogger()
+	errTrack := errtrack.New()
+	if err := errTrack.InitSentry(config.SentryConfig); err != nil {
+		log.Error("obs: cannot init Sentry", err)
 	}
-	return obs
+
+	if !config.NOGCloudEnabled {
+		if err := errTrack.InitGoogleCloudErrorReporting(config.GCloudConfig); err != nil {
+			log.Error("obs: cannot init GoogleCloudErrorReporting", err)
+		}
+		if err := profiler.Start(profiler.Config{
+			Service:        config.GCloudConfig.ServiceName,
+			ServiceVersion: config.GCloudConfig.ServiceVersion,
+		}); err != nil {
+			log.Error("obs: cannot start GoogleCloudProfiler", err)
+			errTrack.CaptureError(err, nil)
+		}
+	}
+	return Observer{Log: log, ErrorTracker: errTrack}
 }

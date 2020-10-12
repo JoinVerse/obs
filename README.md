@@ -32,7 +32,11 @@ func main() {
 
 ## Error tracking
 
-Error tracking provides an interface to send your errors to different providers, it supports [sentry](sentry.io) and [GCP Error Reporting](https://cloud.google.com/error-reporting)
+Error tracking provides an interface to send your errors to different providers, it supports [sentry](sentry.io) and 
+[GCP Error Reporting](https://cloud.google.com/error-reporting).
+
+> On GKE, you must add the cloud-platform access scope when creating the cluster, as the following example command shows:
+> `gcloud container clusters create example-cluster-name --scopes https://www.googleapis.com/auth/cloud-platform`
 
 ```go
 package main
@@ -43,15 +47,9 @@ import (
 )
 
 func main() {
-	conf := errtrack.Config{
-		ServiceName:     "",
-		ServiceVersion:  "",
-		SentryDSN:       "",
-		GCloudEnabled:   false,
-		GCloudProjectID: "",
-	}
-
-	errorTracker := errtrack.New(conf)
+	errorTracker := errtrack.New()
+    _ = errorTracker.InitGoogleCloudErrorReporting(errtrack.GoogleCloudErrorReportingConfig{})
+    _ = errorTracker.InitSentry(errtrack.SentryConfig{})
 	defer errorTracker.Close()
 
 	err := fmt.Errorf("main: ups, that was an error")
@@ -70,16 +68,11 @@ package main
 import (
     "fmt"
 	"github.com/JoinVerse/obs"
-	"github.com/JoinVerse/obs/errtrack"
 )
 
 func main() {
-	conf := errtrack.Config{
-		ServiceName:     "",
-		ServiceVersion:  "",
-		SentryDSN:       "",
-		GCloudEnabled:   false,
-		GCloudProjectID: "",
+	conf := obs.Config{
+		NOGCloudEnabled: true,
 	}
 
 	observer := obs.New(conf)
@@ -97,4 +90,5 @@ func main() {
 This module also provides functionality to be used with `net/http`. See how to use it [here](github.com/JoinVerse/obs/examples/http/main.go)
 
 - `errtrack.CaptureHttpError` capture requests information along with the user id if `X-User-ID` header has being set.
-- `htop.Logger` is a middleware that logs end of each request, along with some useful data about what was requested, what the response status was, and how long it took to return.
+- `htop.Logger` is a middleware that logs end of each request, along with some useful data about what was requested, 
+what the response status was, and how long it took to return.

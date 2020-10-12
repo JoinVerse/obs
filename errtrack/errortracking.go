@@ -2,21 +2,25 @@ package errtrack
 
 import (
 	"context"
+	"fmt"
 	"github.com/JoinVerse/obs/errtrack/gcp"
 	"github.com/JoinVerse/obs/errtrack/sentry"
-	"log"
 	"net/http"
 )
 
-// Config handles error tracker exporters configuration
-type Config struct {
+// SentryConfig handles Sentry exporter configuration.
+type SentryConfig struct {
+	SentryDSN      string
+	ServiceVersion string
+	OnGetUser      func(r *http.Request) sentry.User
+}
+
+// GoogleCloudErrorReportingConfig handles GoogleCloudErrorReporting configuration.
+type GoogleCloudErrorReportingConfig struct {
 	ServiceName     string
 	ServiceVersion  string
-	SentryDSN       string
-	SentryOnGetUser func(r *http.Request) sentry.User
-	GCloudEnabled   bool
 	GCloudProjectID string
-	GCloudOnGetUser func(r *http.Request) string
+	OnGetUser       func(r *http.Request) string
 }
 
 type ErrorTracker struct {
@@ -31,51 +35,53 @@ type errorExporter interface {
 }
 
 // New creates a new ErrorTracker
-func New(config Config) *ErrorTracker {
-	var errorExporters []errorExporter
-	if config.SentryDSN != "" {
-		sentryExporter, err := sentry.New(config.SentryDSN, config.ServiceVersion, config.SentryOnGetUser)
-		if err != nil {
-			log.Printf("CaptureError initializing Sentry CaptureError Tracker %v\n", err)
-		} else {
-			errorExporters = append(errorExporters, sentryExporter)
-		}
-	}
-
-	if config.GCloudEnabled {
-		gcloudExporter, err := gcp.New(
-			context.Background(),
-			config.GCloudProjectID,
-			config.ServiceName,
-			config.ServiceVersion,
-			config.GCloudOnGetUser)
-		if err != nil {
-			log.Printf("CaptureError initializing Google Cloud CaptureError Tracker: %v\n", err)
-		} else {
-			errorExporters = append(errorExporters, gcloudExporter)
-		}
-	}
-
-	return &ErrorTracker{errorExporters}
+func New() *ErrorTracker {
+	return &ErrorTracker{}
 }
 
-// CaptureError send error to all other error trackers.
-func (et *ErrorTracker) CaptureError(err error, tags map[string]string) {
-	for _, et := range et.errorExporters {
-		et.CaptureError(err, tags)
+// InitSentry initializes Sentry error tracker
+func (e *ErrorTracker) InitSentry(config SentryConfig) error {
+	sentryExporter, err := sentry.New(config.SentryDSN, config.ServiceVersion, config.OnGetUser)
+	if err != nil {
+		return fmt.Errorf("errtrack: cannot start Sentry error tracker %w", err)
+	}
+	e.errorExporters = append(e.errorExporters, sentryExporter)
+
+	return nil
+}
+
+// InitGoogleCloudErrorReporting initializes Google Cloud Error Reporting
+func (e *ErrorTracker) InitGoogleCloudErrorReporting(config GoogleCloudErrorReportingConfig) error {
+	gcloudExporter, err := gcp.New(
+		context.Background(),
+		config.GCloudProjectID,
+		config.ServiceName,
+		config.ServiceVersion,
+		config.OnGetUser)
+	if err != nil {
+		return fmt.Errorf("errtrack: cannot start Google Cloud Error Reporting %w", err)
+	}
+	e.errorExporters = append(e.errorExporters, gcloudExporter)
+	return nil
+}
+
+// CaptureError sends error to all other error trackers.
+func (e *ErrorTracker) CaptureError(err error, tags map[string]string) {
+	for _, e := range e.errorExporters {
+		e.CaptureError(err, tags)
 	}
 }
 
-// CaptureHttpError send error to all other error trackers.
-func (et *ErrorTracker) CaptureHttpError(err error, r *http.Request, tags map[string]string) {
-	for _, et := range et.errorExporters {
-		et.CaptureHttpError(err, r, tags)
+// CaptureHttpError sends error to all other error trackers.
+func (e *ErrorTracker) CaptureHttpError(err error, r *http.Request, tags map[string]string) {
+	for _, e := range e.errorExporters {
+		e.CaptureHttpError(err, r, tags)
 	}
 }
 
 // Close calls each children Close.
-func (et *ErrorTracker) Close() {
-	for _, et := range et.errorExporters {
-		et.Close()
+func (e *ErrorTracker) Close() {
+	for _, e := range e.errorExporters {
+		e.Close()
 	}
 }

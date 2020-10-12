@@ -3,16 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/JoinVerse/obs"
-	"github.com/JoinVerse/obs/errtrack"
 )
 
 func main() {
-	conf := errtrack.Config{
-		ServiceName:     "",
-		ServiceVersion:  "",
-		SentryDSN:       "",
-		GCloudEnabled:   false,
-		GCloudProjectID: "",
+	conf := obs.Config{
+		NOGCloudEnabled: true,
 	}
 
 	observer := obs.New(conf)

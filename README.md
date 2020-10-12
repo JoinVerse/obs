@@ -2,7 +2,9 @@
 Observability module for GO applications
 
 ## Logs
-It provides a simple interface for logging based on [zerolog](https://github.com/rs/zerolog):
+It provides a simple interface for logging based on [zerolog](https://github.com/rs/zerolog)
+
+> Avoid package-global logger https://github.com/uber-go/zap/blob/master/FAQ.md#why-include-package-global-loggers
 
 ```go
 package main

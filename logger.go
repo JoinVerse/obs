@@ -28,7 +28,8 @@ func (l *Logger) Fatal(msg string, err error) {
 
 // NewLogger returns a new Logger.
 func NewLogger() *Logger {
-	return &Logger{zerolog.New(os.Stderr).With().Timestamp().Logger()}
+	host, _ := os.Hostname()
+	return &Logger{zerolog.New(os.Stderr).With().Timestamp().Str("host", host).Logger()}
 }
 
 // NewNopLogger returns a disabled Logger for which all operation are no-op.

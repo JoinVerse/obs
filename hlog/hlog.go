@@ -12,7 +12,8 @@ import (
 // some useful data about what was requested, what the response status was,
 // and how long it took to return.
 func Logger(h http.Handler) http.Handler {
-	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
+	host, _ := os.Hostname()
+	logger := zerolog.New(os.Stdout).With().Timestamp().Str("host", host).Logger()
 	handler := hlog.NewHandler(logger)
 	accessHandler := hlog.AccessHandler(func(r *http.Request, status, size int, duration time.Duration) {
 		hlog.FromRequest(r).Info().

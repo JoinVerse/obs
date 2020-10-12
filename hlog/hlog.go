@@ -8,13 +8,22 @@ import (
 	"time"
 )
 
+var logger *zerolog.Logger
+
+func getLogger() *zerolog.Logger	{
+	if logger != nil {
+		host, _ := os.Hostname()
+		*logger = zerolog.New(os.Stdout).With().Timestamp().Str("host", host).Logger()
+	}
+	return logger
+}
+
 // Logger is a middleware that logs end of each request, along with
 // some useful data about what was requested, what the response status was,
 // and how long it took to return.
 func Logger(h http.Handler) http.Handler {
-	host, _ := os.Hostname()
-	logger := zerolog.New(os.Stdout).With().Timestamp().Str("host", host).Logger()
-	handler := hlog.NewHandler(logger)
+	logger := getLogger()
+	handler := hlog.NewHandler(*logger)
 	accessHandler := hlog.AccessHandler(func(r *http.Request, status, size int, duration time.Duration) {
 		hlog.FromRequest(r).Info().
 			Str("method", r.Method).

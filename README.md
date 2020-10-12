@@ -62,7 +62,7 @@ func main() {
 
 ## Observer
 
-Observer is a wrapper of Logger and Error tracker
+Observer is a wrapper of Logger and Error tracker, it also enables [Cloud Profiler](https://cloud.google.com/profiler/) 
 
 ```go
 package main

@@ -1,6 +1,9 @@
 package obs
 
-import "github.com/JoinVerse/obs/errtrack"
+import (
+	"cloud.google.com/go/profiler"
+	"github.com/JoinVerse/obs/errtrack"
+)
 
 // Observer provides observer object
 type Observer struct {
@@ -10,5 +13,14 @@ type Observer struct {
 
 // New returns a new observer.
 func New(errConfig errtrack.Config) Observer {
-	return Observer{Log: NewLogger(), ErrorTracker: errtrack.New(errConfig)}
+	obs :=  Observer{Log: NewLogger(), ErrorTracker: errtrack.New(errConfig)}
+
+	if err := profiler.Start(profiler.Config{
+		Service:        errConfig.ServiceName,
+		ServiceVersion: errConfig.ServiceVersion,
+	}); err != nil {
+		obs.Log.Error("obs: cannot start profiling", err)
+		obs.CaptureError(err, nil)
+	}
+	return obs
 }

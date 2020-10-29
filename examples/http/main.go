@@ -17,8 +17,7 @@ func main() {
 	defer observer.Close()
 
 	err := fmt.Errorf("main: ups, that was an error")
-	observer.CaptureError(err, map[string]string{"key": "value"})
-	observer.Log.Error("ouch", err)
+	observer.ErrorTags("ouch", map[string]string{"key": "value"}, err)
 
 	okHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "OK\n")
@@ -26,8 +25,7 @@ func main() {
 
 	errorHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		err := fmt.Errorf("main: ups, something wrong happend with the request")
-		observer.CaptureHttpError(err, r, nil) // Report error to provider
-		observer.Log.Error("mamma mia", err)   // Write log to Stderr
+		observer.HttpError(r, err) // Report error to provider
 
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "ups\n")

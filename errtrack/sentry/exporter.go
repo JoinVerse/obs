@@ -53,6 +53,18 @@ func (e *Exporter) CaptureHttpError(err error, r *http.Request, tags map[string]
 	})
 }
 
+// CaptureHttpWarning send warning to Sentry.
+func (e *Exporter) CaptureHttpWarning(err error, r *http.Request, tags map[string]string) {
+	user := e.getUser(r)
+	sentry.WithScope(func(scope *sentry.Scope) {
+		scope.SetLevel(sentry.LevelWarning)
+		scope.SetRequest(r)
+		scope.SetTags(tags)
+		scope.SetUser(sentry.User(user))
+		sentry.CaptureException(err)
+	})
+}
+
 func (e *Exporter) getUser(r *http.Request) User {
 	if e.getUserFn != nil {
 		return e.getUserFn(r)

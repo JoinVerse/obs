@@ -58,6 +58,11 @@ func (e *Exporter) CaptureHttpError(err error, r *http.Request, tags map[string]
 	e.errorClient.Flush()
 }
 
+// CaptureHttpWarning send error to Google Cloud's Stack Driver.
+func (e *Exporter) CaptureHttpWarning(err error, r *http.Request, tags map[string]string) {
+	e.CaptureHttpError(err, r, tags)
+}
+
 func (e *Exporter) getUser(r *http.Request) string {
 	if e.getUserFn != nil {
 		return e.getUserFn(r)

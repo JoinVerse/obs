@@ -16,5 +16,8 @@ func (*Exporter) CaptureError(err error, tags map[string]string) {}
 // CaptureHttpError send error to nowhere.
 func (*Exporter) CaptureHttpError(err error, r http.Request, tags map[string]string) {}
 
+// CaptureHttpWarning send warning to nowhere.
+func (*Exporter) CaptureHttpWarning(err error, r http.Request, tags map[string]string) {}
+
 // Close does nothing.
 func (*Exporter) Close() {}

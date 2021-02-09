@@ -1,9 +1,10 @@
 package obs
 
 import (
+	"net/http"
+
 	"cloud.google.com/go/profiler"
 	"github.com/JoinVerse/obs/errtrack"
-	"net/http"
 )
 
 type Config struct {
@@ -77,6 +78,17 @@ func (o *Observer) HttpError(r *http.Request, err error) {
 // HTTPError logs an error message to Stderr and send the error among the tags, to configured trackers.
 func (o *Observer) HttpErrorTags(r *http.Request, tags map[string]string, err error) {
 	o.errTrack.CaptureHttpError(err, r, tags)
+	o.log.Error("", err)
+}
+
+// HTTPWarning logs an error message to Stderr and send the error to configured trackers.
+func (o *Observer) HttpWarning(r *http.Request, err error) {
+	o.HttpWarningTags(r, nil, err)
+}
+
+// HTTPWarning logs an error message to Stderr and send the error among the tags, to configured trackers.
+func (o *Observer) HttpWarningTags(r *http.Request, tags map[string]string, err error) {
+	o.errTrack.CaptureHttpWarning(err, r, tags)
 	o.log.Error("", err)
 }
 

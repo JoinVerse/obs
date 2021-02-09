@@ -3,9 +3,10 @@ package errtrack
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	"github.com/JoinVerse/obs/errtrack/gcp"
 	"github.com/JoinVerse/obs/errtrack/sentry"
-	"net/http"
 )
 
 // SentryConfig handles Sentry exporter configuration.
@@ -31,6 +32,7 @@ type ErrorTracker struct {
 type errorExporter interface {
 	CaptureError(err error, tags map[string]string)
 	CaptureHttpError(err error, r *http.Request, tags map[string]string)
+	CaptureHttpWarning(err error, r *http.Request, tags map[string]string)
 	Close()
 }
 
@@ -76,6 +78,13 @@ func (e *ErrorTracker) CaptureError(err error, tags map[string]string) {
 func (e *ErrorTracker) CaptureHttpError(err error, r *http.Request, tags map[string]string) {
 	for _, e := range e.errorExporters {
 		e.CaptureHttpError(err, r, tags)
+	}
+}
+
+// CaptureHttpWarning sends error to all other error trackers.
+func (e *ErrorTracker) CaptureHttpWarning(err error, r *http.Request, tags map[string]string) {
+	for _, e := range e.errorExporters {
+		e.CaptureHttpWarning(err, r, tags)
 	}
 }
 

@@ -34,7 +34,7 @@ func TestRequestIDFromHeaderHandler(t *testing.T) {
 				if ok {
 					t.Fatal("Not missing id in request")
 				}
-				if want, got := "514bbe5bb5251c92bd07a9846f4a1ab6", w.Header().Get("X-Request-Id"); got != want {
+				if want, got := reqID, w.Header().Get("X-Request-Id"); got != want {
 					t.Errorf("Invalid Request-Id header, got: %s, want: %s", got, want)
 				}
 				l := hlog.FromRequest(r)

@@ -7,6 +7,7 @@ import (
 	"github.com/JoinVerse/obs/errtrack"
 )
 
+// Config ...
 type Config struct {
 	GCloudConfig errtrack.GoogleCloudErrorReportingConfig
 	//When true, GCP integration is disabled.
@@ -37,7 +38,7 @@ func New(config Config) Observer {
 			ServiceVersion: config.GCloudConfig.ServiceVersion,
 		}); err != nil {
 			log.Error("obs: cannot start GoogleCloudProfiler", err)
-			errTrack.CaptureError(err, nil)
+			errTrack.CaptureError(err, nil, nil)
 		}
 	}
 	return Observer{log: log, errTrack: errTrack}

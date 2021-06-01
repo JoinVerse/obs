@@ -3,9 +3,10 @@ package errtrack
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	"github.com/JoinVerse/obs/errtrack/gcp"
 	"github.com/JoinVerse/obs/errtrack/sentry"
-	"net/http"
 )
 
 // SentryConfig handles Sentry exporter configuration.
@@ -23,14 +24,15 @@ type GoogleCloudErrorReportingConfig struct {
 	OnGetUser       func(r *http.Request) string
 }
 
+// ErrorTracker ...
 type ErrorTracker struct {
 	errorExporters []errorExporter
 }
 
 // errorExporter defines the interface to export errors to providers
 type errorExporter interface {
-	CaptureError(err error, tags map[string]string)
-	CaptureHttpError(err error, r *http.Request, tags map[string]string)
+	CaptureError(err error, tags map[string]string, context map[string]string)
+	CaptureHttpError(err error, r *http.Request, tags map[string]string, context map[string]string)
 	Close()
 }
 
@@ -66,16 +68,16 @@ func (e *ErrorTracker) InitGoogleCloudErrorReporting(config GoogleCloudErrorRepo
 }
 
 // CaptureError sends error to all other error trackers.
-func (e *ErrorTracker) CaptureError(err error, tags map[string]string) {
+func (e *ErrorTracker) CaptureError(err error, tags map[string]string, context map[string]string) {
 	for _, e := range e.errorExporters {
-		e.CaptureError(err, tags)
+		e.CaptureError(err, tags, context)
 	}
 }
 
 // CaptureHttpError sends error to all other error trackers.
-func (e *ErrorTracker) CaptureHttpError(err error, r *http.Request, tags map[string]string) {
+func (e *ErrorTracker) CaptureHttpError(err error, r *http.Request, tags map[string]string, context map[string]string) {
 	for _, e := range e.errorExporters {
-		e.CaptureHttpError(err, r, tags)
+		e.CaptureHttpError(err, r, tags, context)
 	}
 }
 

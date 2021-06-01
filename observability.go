@@ -1,9 +1,10 @@
 package obs
 
 import (
+	"net/http"
+
 	"cloud.google.com/go/profiler"
 	"github.com/JoinVerse/obs/errtrack"
-	"net/http"
 )
 
 type Config struct {
@@ -65,7 +66,13 @@ func (o *Observer) Error(msg string, err error) {
 
 // ErrorTags logs an error message to Stderr and send the error among the tags, to configured trackers.
 func (o *Observer) ErrorTags(msg string, tags map[string]string, err error) {
-	o.errTrack.CaptureError(err, tags)
+	o.errTrack.CaptureError(err, tags, nil)
+	o.log.Error(msg, err)
+}
+
+// ErrorTagsAndContext logs an error message to Stderr and send the error among the tags and context, to configured trackers.
+func (o *Observer) ErrorTagsAndContext(msg string, tags map[string]string, context map[string]string, err error) {
+	o.errTrack.CaptureError(err, tags, context)
 	o.log.Error(msg, err)
 }
 
@@ -74,15 +81,21 @@ func (o *Observer) HttpError(r *http.Request, err error) {
 	o.HttpErrorTags(r, nil, err)
 }
 
-// HTTPError logs an error message to Stderr and send the error among the tags, to configured trackers.
+// HttpErrorTags logs an error message to Stderr and send the error among the tags, to configured trackers.
 func (o *Observer) HttpErrorTags(r *http.Request, tags map[string]string, err error) {
-	o.errTrack.CaptureHttpError(err, r, tags)
+	o.errTrack.CaptureHttpError(err, r, tags, nil)
+	o.log.Error("", err)
+}
+
+// HttpErrorTagsAndContext logs an error message to Stderr and send the error among the tags, to configured trackers.
+func (o *Observer) HttpErrorTagsAndContext(r *http.Request, tags map[string]string, context map[string]string, err error) {
+	o.errTrack.CaptureHttpError(err, r, tags, context)
 	o.log.Error("", err)
 }
 
 // Fatal logs a fatal message to Stderr and send the error to configured trackers.
 // The os.Exit(1) function is called, which terminates the program immediately.
 func (o *Observer) Fatal(msg string, err error) {
-	o.errTrack.CaptureError(err, nil)
+	o.errTrack.CaptureError(err, nil, nil)
 	o.log.Fatal(msg, err)
 }

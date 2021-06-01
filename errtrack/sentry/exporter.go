@@ -35,20 +35,22 @@ func (e *Exporter) Close() {
 }
 
 // CaptureError send error to Sentry.
-func (e *Exporter) CaptureError(err error, tags map[string]string) {
+func (e *Exporter) CaptureError(err error, tags map[string]string, context map[string]string) {
 	sentry.WithScope(func(scope *sentry.Scope) {
 		scope.SetTags(tags)
+		scope.SetContext("context", context)
 		sentry.CaptureException(err)
 	})
 }
 
 // CaptureHttpError send error to Sentry.
-func (e *Exporter) CaptureHttpError(err error, r *http.Request, tags map[string]string) {
+func (e *Exporter) CaptureHttpError(err error, r *http.Request, tags map[string]string, context map[string]string) {
 	user := e.getUser(r)
 	sentry.WithScope(func(scope *sentry.Scope) {
 		scope.SetRequest(r)
 		scope.SetTags(tags)
 		scope.SetUser(sentry.User(user))
+		scope.SetContext("context", context)
 		sentry.CaptureException(err)
 	})
 }

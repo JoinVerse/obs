@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/JoinVerse/obs/errtrack"
 	"github.com/JoinVerse/obs/errtrack/noop"
 )
@@ -13,11 +14,11 @@ func main() {
 	defer errorTracker.Close()
 
 	err := fmt.Errorf("main: ups, that was an error")
-	errorTracker.CaptureError(err, map[string]string{"key": "value"})
+	errorTracker.CaptureError(err, map[string]string{"key": "value"}, nil)
 
 	// You can use the noopExporter exporter for testing purposes, it does nothing
 	noopExporter := noop.New()
 	defer noopExporter.Close()
-	noopExporter.CaptureError(err, map[string]string{"os": "Darwin"})
+	noopExporter.CaptureError(err, map[string]string{"os": "Darwin"}, map[string]string{"body": "{'ola':'ola2'}"})
 
 }

@@ -1,6 +1,8 @@
 # obs
 Observability module for GO applications
 
+[![CodeQL](https://github.com/JoinVerse/obs/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/JoinVerse/obs/actions/workflows/codeql-analysis.yml)
+
 ## Observer
 
 Observer is a wrapper of Logger and Error tracker, it also enables [Cloud Profiler](https://cloud.google.com/profiler/).

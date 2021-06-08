@@ -1,6 +1,7 @@
 package obs
 
 import (
+	"io/ioutil"
 	"net/http"
 
 	"cloud.google.com/go/profiler"
@@ -77,9 +78,22 @@ func (o *Observer) ErrorTagsAndContext(msg string, tags map[string]string, conte
 	o.log.Error(msg, err)
 }
 
-// HTTPError logs an error message to Stderr and send the error to configured trackers.
+// HttpError logs an error message to Stderr and send the error to configured trackers.
 func (o *Observer) HttpError(r *http.Request, err error) {
-	o.HttpErrorTags(r, nil, err)
+	// body is not send in Sentry when we capture the request so we send the body as a context.
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		o.HttpErrorTags(r, nil, err)
+	}
+
+	o.HttpErrorTagsAndContext(
+		r,
+		nil,
+		map[string]string{
+			"body": string(bodyBytes),
+		},
+		err,
+	)
 }
 
 // HttpErrorTags logs an error message to Stderr and send the error among the tags, to configured trackers.

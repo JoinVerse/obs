@@ -51,8 +51,8 @@ func (e *Exporter) CaptureHttpError(err error, r *http.Request, tags map[string]
 		scope.SetRequest(r)
 		// Adds r.Body explicitly because setRequest only set it at same time is read
 		// so you MUST calls SetRequest before read the body
-		if r != nil && (r.Body != nil || r.Body != http.NoBody) {
-			if bodyBytes, err := ioutil.ReadAll(r.Body); err == nil{
+		if r != nil && r.Body != nil && r.Body != http.NoBody {
+			if bodyBytes, err := ioutil.ReadAll(r.Body); err == nil {
 				scope.SetRequestBody(bodyBytes)
 			}
 		}

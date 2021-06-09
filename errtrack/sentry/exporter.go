@@ -49,9 +49,9 @@ func (e *Exporter) CaptureHttpError(err error, r *http.Request, tags map[string]
 	user := e.getUser(r)
 	sentry.WithScope(func(scope *sentry.Scope) {
 		scope.SetRequest(r)
-		// Add r.Body explicitly because setRequest only set it at same time is read
+		// Adds r.Body explicitly because setRequest only set it at same time is read
 		// so you MUST calls SetRequest before read the body
-		if r.Body != nil || r.Body != http.NoBody {
+		if r != nil && (r.Body != nil || r.Body != http.NoBody) {
 			if bodyBytes, err := ioutil.ReadAll(r.Body); err == nil{
 				scope.SetRequestBody(bodyBytes)
 			}

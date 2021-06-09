@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/JoinVerse/obs"
 	"github.com/JoinVerse/obs/hlog"
 	"github.com/JoinVerse/obs/log"
-	"net/http"
 )
 
 func main() {

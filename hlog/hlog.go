@@ -31,7 +31,7 @@ type LoggerZ struct {
 	zerolog.Logger
 }
 
-// New creates a root logger with os.Stdout output writer.
+// New creates a root logger with os.Stdout writer.
 func New() LoggerZ {
 	return NewWithWriter(os.Stdout)
 }

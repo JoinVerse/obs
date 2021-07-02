@@ -2,13 +2,17 @@ package hlog
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
+	"github.com/stretchr/testify/assert"
 )
 
 func decodeIfBinary(out *bytes.Buffer) (string, error) {
@@ -51,4 +55,37 @@ func TestRequestIDFromHeaderHandler(t *testing.T) {
 	)
 	h = hlog.NewHandler(zerolog.New(out))(h)
 	h.ServeHTTP(httptest.NewRecorder(), r)
+}
+
+type httpTestHandler struct{}
+
+func (h *httpTestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("ok"))
+}
+
+func TestBodyHandler(t *testing.T) {
+	expectedLogBody := "{\"key1\":\"Value\",\"key2\":\"42\"}"
+	r := &http.Request{
+		URL:  &url.URL{Path: "/"},
+		Body: ioutil.NopCloser(bytes.NewBuffer([]byte(expectedLogBody))),
+	}
+
+	httpTestHandler := &httpTestHandler{}
+	recorder := httptest.NewRecorder()
+	out := &bytes.Buffer{}
+	logger := NewWithWriter(out)
+	h := logger.Handler(httpTestHandler)
+	h.ServeHTTP(recorder, r)
+
+	if r.Body == nil || r.Body == http.NoBody {
+		t.Fatal("Request body must be present")
+	}
+	assert.Equal(t, http.StatusOK, recorder.Code, "Response code must be 200")
+	actualLog := struct {
+		Body string
+	}{}
+	fmt.Println(out.String())
+	err := json.Unmarshal([]byte(out.String()), &actualLog)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedLogBody, actualLog.Body, "Unexpected Log String")
 }

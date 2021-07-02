@@ -84,7 +84,6 @@ func TestBodyHandler(t *testing.T) {
 	actualLog := struct {
 		Body string
 	}{}
-	fmt.Println(out.String())
 	err := json.Unmarshal([]byte(out.String()), &actualLog)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedLogBody, actualLog.Body, "Unexpected Log Bogy String")

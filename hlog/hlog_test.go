@@ -92,5 +92,5 @@ func TestBodyHandler(t *testing.T) {
 	}{}
 	err = json.Unmarshal([]byte(out.String()), &actualLog)
 	assert.Nil(t, err)
-	assert.Equal(t, expectedJSONBody, actualLog.RequestBody, "Unexpected RequestBody Log String")
+	assert.Equal(t, expectedJSONBody, actualLog.RequestBody, "Unexpected RequestBody Log")
 }

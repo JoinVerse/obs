@@ -67,10 +67,13 @@ func (h *httpTestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestBodyHandler(t *testing.T) {
-	expectedLogBody := "{\"key1\":\"Value\",\"key2\":\"42\"}"
+	expectedLogBody := []byte(`{"key1":"Value","key2":"42"}`)
+	var expectedJSONBody map[string]interface{}
+	err := json.Unmarshal(expectedLogBody, &expectedJSONBody)
+	assert.Nil(t, err)
 	r := &http.Request{
 		URL:  &url.URL{Path: "/"},
-		Body: ioutil.NopCloser(bytes.NewBuffer([]byte(expectedLogBody))),
+		Body: ioutil.NopCloser(bytes.NewBuffer(expectedLogBody)),
 	}
 
 	httpTestHandler := &httpTestHandler{}
@@ -85,9 +88,9 @@ func TestBodyHandler(t *testing.T) {
 	}
 	assert.Equal(t, http.StatusOK, recorder.Code, "Response code must be 200")
 	actualLog := struct {
-		RequestBody string `json:"requestBody"`
+		RequestBody map[string]interface{} `json:"requestBody"`
 	}{}
-	err := json.Unmarshal([]byte(out.String()), &actualLog)
+	err = json.Unmarshal([]byte(out.String()), &actualLog)
 	assert.Nil(t, err)
-	assert.Equal(t, expectedLogBody, actualLog.RequestBody, "Unexpected RequestBody Log String")
+	assert.Equal(t, expectedJSONBody, actualLog.RequestBody, "Unexpected RequestBody Log String")
 }

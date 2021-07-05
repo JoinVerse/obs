@@ -48,33 +48,51 @@ func (l *LoggerZ) Handler(h http.Handler) http.Handler {
 	handler := hlog.NewHandler(zLogger)
 	accessHandler := hlog.AccessHandler(
 		func(r *http.Request, status, size int, duration time.Duration) {
-			event := hlog.FromRequest(r).Info().
+			hlog.FromRequest(r).Info().
 				Str("method", r.Method).
 				Str("url", r.URL.String()).
 				Int("status", status).
 				Int("size", size).
-				Dur("duration", duration)
-
-			if r.Body != nil && r.Body != http.NoBody {
-				// Read the content
-				var bodyBytes []byte
-				if r.Body != nil {
-					bodyBytes, _ = ioutil.ReadAll(r.Body)
-				}
-				// Restore the io.ReadCloser to its original state
-				r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-				// Use the content
-				event.Str("body", string(bodyBytes))
-			}
-
-			event.Msg("")
+				Dur("duration", duration).
+				Msg("")
 		},
 	)
+	requestBodyHandler := RequestBodyHandler("requestBody")
 	remoteAddrHandler := hlog.RemoteAddrHandler("ip")
-	userAgentHandler := hlog.UserAgentHandler("user_agent")
+	userAgentHandler := hlog.UserAgentHandler("userAgent")
 	refererHandler := hlog.RefererHandler("referer")
-	requestIDHandler := RequestIDHeaderHandler("req_id", "X-Request-Id")
-	return handler(accessHandler(remoteAddrHandler(userAgentHandler(refererHandler(requestIDHandler(h))))))
+	requestIDHandler := RequestIDHeaderHandler("requestId", "X-Request-Id")
+	return handler(
+		accessHandler(requestBodyHandler(remoteAddrHandler(userAgentHandler(refererHandler(requestIDHandler(h)))))),
+	)
+}
+
+// RequestBodyHandler adds the requested Body as a field to the context's logger
+// using fieldKey as field key.
+func RequestBodyHandler(fieldKey string) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				if r.Body != nil && r.Body != http.NoBody {
+					log := zerolog.Ctx(r.Context())
+					// Read the content
+					var bodyBytes []byte
+					if r.Body != nil {
+						bodyBytes, _ = ioutil.ReadAll(r.Body)
+					}
+					// Restore the io.ReadCloser to its original state
+					r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+					log.UpdateContext(
+						func(c zerolog.Context) zerolog.Context {
+							// Use the content
+							return c.Str(fieldKey, string(bodyBytes))
+						},
+					)
+				}
+				next.ServeHTTP(w, r)
+			},
+		)
+	}
 }
 
 // Deprecated: Use LoggerZ object instead.

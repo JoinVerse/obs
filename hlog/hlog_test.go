@@ -60,6 +60,9 @@ func TestRequestIDFromHeaderHandler(t *testing.T) {
 type httpTestHandler struct{}
 
 func (h *httpTestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	fmt.Println("body: ", string(body))
 	w.Write([]byte("ok"))
 }
 
@@ -82,9 +85,9 @@ func TestBodyHandler(t *testing.T) {
 	}
 	assert.Equal(t, http.StatusOK, recorder.Code, "Response code must be 200")
 	actualLog := struct {
-		Body string
+		RequestBody string `json:"requestBody"`
 	}{}
 	err := json.Unmarshal([]byte(out.String()), &actualLog)
 	assert.Nil(t, err)
-	assert.Equal(t, expectedLogBody, actualLog.Body, "Unexpected Log Bogy String")
+	assert.Equal(t, expectedLogBody, actualLog.RequestBody, "Unexpected RequestBody Log String")
 }

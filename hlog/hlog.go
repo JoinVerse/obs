@@ -57,17 +57,19 @@ func (l *LoggerZ) Handler(h http.Handler) http.Handler {
 				Msg("")
 		},
 	)
-	bodyHandler := BodyHandler("requestBody")
+	requestBodyHandler := RequestBodyHandler("requestBody")
 	remoteAddrHandler := hlog.RemoteAddrHandler("ip")
 	userAgentHandler := hlog.UserAgentHandler("userAgent")
 	refererHandler := hlog.RefererHandler("referer")
 	requestIDHandler := RequestIDHeaderHandler("requestId", "X-Request-Id")
-	return handler(accessHandler(bodyHandler(remoteAddrHandler(userAgentHandler(refererHandler(requestIDHandler(h)))))))
+	return handler(
+		accessHandler(requestBodyHandler(remoteAddrHandler(userAgentHandler(refererHandler(requestIDHandler(h)))))),
+	)
 }
 
-// BodyHandler adds the requested Body as a field to the context's logger
+// RequestBodyHandler adds the requested Body as a field to the context's logger
 // using fieldKey as field key.
-func BodyHandler(fieldKey string) func(next http.Handler) http.Handler {
+func RequestBodyHandler(fieldKey string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {

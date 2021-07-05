@@ -32,7 +32,10 @@ func main() {
 		fmt.Fprintf(w, "ups\n")
 	})
 
-	http.Handle("/", hlog.Logger(okHandler))
+	logger := hlog.New()
+
+	http.Handle("/", logger.Handler(okHandler))
+	// Use always logger.Handler hlog.Logger is deprecated keep it here for testing backward compatibility
 	http.Handle("/error", hlog.Logger(errorHandler))
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {

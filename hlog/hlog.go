@@ -18,6 +18,7 @@ import (
 var logger *zerolog.Logger
 
 func init() {
+	zerolog.TimeFieldFormat = time.RFC3339Nano
 	host, _ := os.Hostname()
 	l := zerolog.New(os.Stdout).With().Timestamp().Str("host", host).Logger()
 	logger = &l

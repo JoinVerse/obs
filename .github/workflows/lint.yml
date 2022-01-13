@@ -14,4 +14,4 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
-          args: "--issues-exit-code=0 --timeout 2m0s -E revive -E gosec -E gocyclo -E goimports -E errorlint -E bodyclose -E noctx"
+          args: "--issues-exit-code=0 --timeout 2m0s -E revive -E gosec -E gocyclo -E goimports -E errorlint -E bodyclose -E noctx -E staticcheck"

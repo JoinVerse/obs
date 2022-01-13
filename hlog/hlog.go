@@ -87,7 +87,7 @@ func RequestBodyHandler(fieldKey string) func(next http.Handler) http.Handler {
 					log.UpdateContext(
 						func(c zerolog.Context) zerolog.Context {
 							// Use the content
-							if isJSON(bodyBytes){
+							if isJSON(bodyBytes) {
 								return c.RawJSON(fieldKey, bodyBytes)
 							}
 							return c.Bytes(fieldKey, bodyBytes)
@@ -104,7 +104,6 @@ func isJSON(s []byte) bool {
 	var js map[string]interface{}
 	return json.Unmarshal(s, &js) == nil
 }
-
 
 // Deprecated: Use LoggerZ object instead.
 // Logger is a middleware that logs end of each request, along with

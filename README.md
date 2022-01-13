@@ -96,6 +96,6 @@ func main() {
 	defer errorTracker.Close()
 
 	err := fmt.Errorf("main: ups, that was an error")
-	errorTracker.CaptureError(err, map[string]string{"key":"value"})
+	errorTracker.CaptureError(err, map[string]string{"key":"value"}, nil)
 }
 ``` 

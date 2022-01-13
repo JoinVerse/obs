@@ -63,7 +63,7 @@ func (h *httpTestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	fmt.Println("body: ", string(body))
-	w.Write([]byte("ok"))
+	_, _ = w.Write([]byte("ok"))
 }
 
 func TestBodyHandler(t *testing.T) {
@@ -90,7 +90,7 @@ func TestBodyHandler(t *testing.T) {
 	actualLog := struct {
 		RequestBody map[string]interface{} `json:"requestBody"`
 	}{}
-	err = json.Unmarshal([]byte(out.String()), &actualLog)
+	err = json.Unmarshal(out.Bytes(), &actualLog)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedJSONBody, actualLog.RequestBody, "Unexpected RequestBody Log")
 }

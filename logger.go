@@ -1,8 +1,9 @@
 package obs
 
 import (
-	"github.com/rs/zerolog"
 	"os"
+
+	"github.com/rs/zerolog"
 )
 
 // Logger implements interface.

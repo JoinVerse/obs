@@ -97,23 +97,25 @@ func TestBodyHandler(t *testing.T) {
 	assert.Equal(t, expectedJSONBody, actualLog.RequestBody, "Unexpected RequestBody Log")
 }
 
-//TestHTTPRequestLogFormat check the format https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#HttpRequest
+// TestHTTPRequestLogFormat check the format https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#HttpRequest
 func TestHTTPRequestLogFormat(t *testing.T) {
 	expectedHTTPRequestLog :=
 		[]byte(`{"latency":"0.000000s", "protocol":"HTTP/1.1", "referer":"https://example.com/", 
-				"remoteIp":"", "requestMethod":"GET", "requestUrl":"https://example.com/", 
+				"remoteIp":"188.26.219.97", "requestMethod":"GET", "requestUrl":"https://example.com/", 
 				"responseSize":"2", "status":200, "userAgent":"obs"}`)
 	var expectedHTTPRequestJSON map[string]interface{}
 	err := json.Unmarshal(expectedHTTPRequestLog, &expectedHTTPRequestJSON)
 	assert.Nil(t, err)
 	r := &http.Request{
-		Method: http.MethodGet,
-		URL:    &url.URL{Scheme: "https", Host: "example.com", Path: "/"},
-		Proto:  "HTTP/1.1",
+		Method:     http.MethodGet,
+		RemoteAddr: "10.132.0.241",
+		URL:        &url.URL{Scheme: "https", Host: "example.com", Path: "/"},
+		Proto:      "HTTP/1.1",
 		Header: map[string][]string{
-			"User-Agent":   {"obs"},
-			"Referer":      {"https://example.com/"},
-			"X-Request-Id": {"randomRequest123"},
+			"User-Agent":      {"obs"},
+			"Referer":         {"https://example.com/"},
+			"X-Request-Id":    {"randomRequest123"},
+			"X-Forwarded-For": {"188.26.219.97, 10.132.0.241"},
 		},
 	}
 

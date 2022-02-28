@@ -60,9 +60,11 @@ func TestRequestIDFromHeaderHandler(t *testing.T) {
 type httpTestHandler struct{}
 
 func (h *httpTestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	body, _ := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-	fmt.Println("body: ", string(body))
+	if r.Body != nil && r.Body != http.NoBody {
+		body, _ := ioutil.ReadAll(r.Body)
+		defer r.Body.Close()
+		fmt.Println("body: ", string(body))
+	}
 	_, _ = w.Write([]byte("ok"))
 }
 
@@ -93,4 +95,42 @@ func TestBodyHandler(t *testing.T) {
 	err = json.Unmarshal(out.Bytes(), &actualLog)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedJSONBody, actualLog.RequestBody, "Unexpected RequestBody Log")
+}
+
+//TestHTTPRequestLogFormat check the format https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#HttpRequest
+func TestHTTPRequestLogFormat(t *testing.T) {
+	expectedHTTPRequestLog :=
+		[]byte(`{"latency":"0.000000s", "protocol":"HTTP/1.1", "referer":"https://example.com/", 
+				"remoteIp":"", "requestMethod":"GET", "requestUrl":"https://example.com/", 
+				"responseSize":"2", "status":200, "userAgent":"obs"}`)
+	var expectedHTTPRequestJSON map[string]interface{}
+	err := json.Unmarshal(expectedHTTPRequestLog, &expectedHTTPRequestJSON)
+	assert.Nil(t, err)
+	r := &http.Request{
+		Method: http.MethodGet,
+		URL:    &url.URL{Scheme: "https", Host: "example.com", Path: "/"},
+		Proto:  "HTTP/1.1",
+		Header: map[string][]string{
+			"User-Agent":   {"obs"},
+			"Referer":      {"https://example.com/"},
+			"X-Request-Id": {"randomRequest123"},
+		},
+	}
+
+	httpTestHandler := &httpTestHandler{}
+	recorder := httptest.NewRecorder()
+	out := &bytes.Buffer{}
+	logger := NewWithWriter(out)
+	h := logger.Handler(httpTestHandler)
+	h.ServeHTTP(recorder, r)
+
+	assert.Equal(t, http.StatusOK, recorder.Code, "Response code must be 200")
+	actualLog := struct {
+		HTTPRequestLog map[string]interface{} `json:"httpRequest"`
+	}{}
+	err = json.Unmarshal(out.Bytes(), &actualLog)
+	assert.Nil(t, err)
+
+	actualLog.HTTPRequestLog["latency"] = "0.000000s" // Just ignore the latency value
+	assert.Equal(t, expectedHTTPRequestJSON, actualLog.HTTPRequestLog, "Unexpected HttpRequest Log Format")
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -51,21 +52,30 @@ func (l *LoggerZ) Handler(h http.Handler) http.Handler {
 	accessHandler := hlog.AccessHandler(
 		func(r *http.Request, status, size int, duration time.Duration) {
 			hlog.FromRequest(r).Info().
-				Str("method", r.Method).
-				Str("url", r.URL.String()).
-				Int("status", status).
-				Int("size", size).
 				Dur("duration", duration).
+				Dict(
+					"httpRequest", zerolog.Dict().
+						Str("requestMethod", r.Method).
+						Str("requestUrl", r.URL.String()).
+						// TODO The size of the HTTP request message in bytes, including the request headers
+						// and the request body. Str("requestSize", "0").
+						Int("status", status).
+						Str("responseSize", fmt.Sprintf("%d", size)).
+						Str("userAgent", r.UserAgent()).
+						Str("remoteIp", r.RemoteAddr).
+						// TODO The IP address (IPv4 or IPv6) of the origin server that the request was sent to.
+						// Str("serverIp", "").
+						Str("referer", r.Referer()).
+						Str("latency", fmt.Sprintf("%fs", duration.Seconds())).
+						Str("protocol", r.Proto),
+				).
 				Msg("")
 		},
 	)
 	requestBodyHandler := RequestBodyHandler("requestBody")
-	remoteAddrHandler := hlog.RemoteAddrHandler("ip")
-	userAgentHandler := hlog.UserAgentHandler("userAgent")
-	refererHandler := hlog.RefererHandler("referer")
 	requestIDHandler := RequestIDHeaderHandler("requestId", "X-Request-Id")
 	return handler(
-		accessHandler(requestBodyHandler(remoteAddrHandler(userAgentHandler(refererHandler(requestIDHandler(h)))))),
+		accessHandler(requestBodyHandler(requestIDHandler(h))),
 	)
 }
 

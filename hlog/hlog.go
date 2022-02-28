@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/rs/xid"
@@ -62,7 +64,7 @@ func (l *LoggerZ) Handler(h http.Handler) http.Handler {
 						Int("status", status).
 						Str("responseSize", fmt.Sprintf("%d", size)).
 						Str("userAgent", r.UserAgent()).
-						Str("remoteIp", r.RemoteAddr).
+						Str("remoteIp", getIPAddress(r)).
 						// TODO The IP address (IPv4 or IPv6) of the origin server that the request was sent to.
 						// Str("serverIp", "").
 						Str("referer", r.Referer()).
@@ -72,11 +74,32 @@ func (l *LoggerZ) Handler(h http.Handler) http.Handler {
 				Msg("")
 		},
 	)
+
 	requestBodyHandler := RequestBodyHandler("requestBody")
 	requestIDHandler := RequestIDHeaderHandler("requestId", "X-Request-Id")
 	return handler(
 		accessHandler(requestBodyHandler(requestIDHandler(h))),
 	)
+}
+
+var xForwardedFor = http.CanonicalHeaderKey("X-Forwarded-For")
+var xRealIP = http.CanonicalHeaderKey("X-Real-IP")
+
+func getIPAddress(r *http.Request) string {
+	var ip string
+	if xrip := r.Header.Get(xRealIP); xrip != "" {
+		ip = xrip
+	} else if xff := r.Header.Get(xForwardedFor); xff != "" {
+		i := strings.Index(xff, ", ")
+		if i == -1 {
+			i = len(xff)
+		}
+		ip = xff[:i]
+	} else if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
+		ip = host
+	}
+
+	return ip
 }
 
 // RequestBodyHandler adds the requested Body as a field to the context's logger

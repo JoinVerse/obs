@@ -146,7 +146,11 @@ func ResponseBodyHandler(fieldKey string) func(next http.Handler) http.Handler {
 				next.ServeHTTP(c, r)
 
 				// Copy headers from response recorder to actual response writer
-				for k, v := range c.HeaderMap {
+				resp := c.Result()
+				if resp == nil {
+					return
+				}
+				for k, v := range resp.Header {
 					w.Header()[k] = v
 				}
 				w.WriteHeader(c.Code)

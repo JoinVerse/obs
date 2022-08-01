@@ -147,7 +147,8 @@ func TestResponseBodyHandler(t *testing.T) {
 		require.NoError(t, err)
 
 		w.WriteHeader(http.StatusOK)
-		w.Write(jsonResp)
+		_, err = w.Write(jsonResp)
+		require.NoError(t, err)
 	})
 
 	w := httptest.NewRecorder()

@@ -150,6 +150,7 @@ func ResponseBodyHandler(fieldKey string) func(next http.Handler) http.Handler {
 				if resp == nil {
 					return
 				}
+				defer resp.Body.Close()
 				for k, v := range resp.Header {
 					w.Header()[k] = v
 				}
@@ -160,7 +161,7 @@ func ResponseBodyHandler(fieldKey string) func(next http.Handler) http.Handler {
 				bodyBytes, _ = ioutil.ReadAll(c.Body)
 
 				// Write content
-				w.Write(bodyBytes)
+				_, _ = w.Write(bodyBytes)
 
 				if len(bodyBytes) == 0 {
 					return

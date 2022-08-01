@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -25,11 +26,27 @@ func main() {
 	})
 
 	errorHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		err := fmt.Errorf("main: ups, something wrong happend with the request")
+		err = fmt.Errorf("main: ups, something wrong happend with the request")
 		observer.HttpError(r, err) // Report error to provider
 
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "ups\n")
+	})
+
+	respBodyHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := make(map[string]string)
+		resp["foo"] = "bar"
+		jsonResp, err := json.Marshal(resp)
+		if err != nil {
+			observer.HttpError(r, err)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(jsonResp)
+	})
+
+	noResponseHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
 	})
 
 	logger := hlog.New()
@@ -37,8 +54,10 @@ func main() {
 	http.Handle("/", logger.Handler(okHandler))
 	// Use always logger.Handler hlog.Logger is deprecated keep it here for testing backward compatibility
 	http.Handle("/error", hlog.Logger(errorHandler))
+	http.Handle("/response_body", logger.Handler(respBodyHandler))
+	http.Handle("/no_response", logger.Handler(noResponseHandler))
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err = http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("Startup failed", err)
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"time"
@@ -77,8 +78,9 @@ func (l *LoggerZ) Handler(h http.Handler) http.Handler {
 
 	requestBodyHandler := RequestBodyHandler("requestBody")
 	requestIDHandler := RequestIDHeaderHandler("requestId", "X-Request-Id")
+	responseBodyHandler := ResponseBodyHandler("responseBody")
 	return handler(
-		accessHandler(requestBodyHandler(requestIDHandler(h))),
+		accessHandler(requestBodyHandler(requestIDHandler(responseBodyHandler(h)))),
 	)
 }
 
@@ -128,6 +130,48 @@ func RequestBodyHandler(fieldKey string) func(next http.Handler) http.Handler {
 					)
 				}
 				next.ServeHTTP(w, r)
+			},
+		)
+	}
+}
+
+// ResponseBodyHandler adds the response Body as a field to the context's logger
+// using fieldKey as field key.
+func ResponseBodyHandler(fieldKey string) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				// Switch out response writer for a recorder for all subsequent handlers
+				c := httptest.NewRecorder()
+				next.ServeHTTP(c, r)
+
+				// Copy headers from response recorder to actual response writer
+				for k, v := range c.HeaderMap {
+					w.Header()[k] = v
+				}
+				w.WriteHeader(c.Code)
+
+				// Read the content
+				var bodyBytes []byte
+				bodyBytes, _ = ioutil.ReadAll(c.Body)
+
+				// Write content
+				w.Write(bodyBytes)
+
+				if len(bodyBytes) == 0 {
+					return
+				}
+
+				log := zerolog.Ctx(r.Context())
+				log.UpdateContext(
+					func(ctx zerolog.Context) zerolog.Context {
+						// Use the content
+						if isJSON(bodyBytes) {
+							return ctx.RawJSON(fieldKey, bodyBytes)
+						}
+						return ctx.Bytes(fieldKey, bodyBytes)
+					},
+				)
 			},
 		)
 	}

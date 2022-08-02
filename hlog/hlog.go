@@ -151,8 +151,10 @@ func ResponseBodyHandler(fieldKey string) func(next http.Handler) http.Handler {
 					return
 				}
 				defer resp.Body.Close()
-				for k, v := range resp.Header {
-					w.Header()[k] = v
+				for k, values := range resp.Header {
+					for _, v := range values {
+						w.Header().Add(k, v)
+					}
 				}
 				w.WriteHeader(c.Code)
 

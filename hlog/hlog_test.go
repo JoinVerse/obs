@@ -13,6 +13,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func decodeIfBinary(out *bytes.Buffer) (string, error) {
@@ -135,4 +136,34 @@ func TestHTTPRequestLogFormat(t *testing.T) {
 
 	actualLog.HTTPRequestLog["latency"] = "0.000000s" // Just ignore the latency value
 	assert.Equal(t, expectedHTTPRequestJSON, actualLog.HTTPRequestLog, "Unexpected HttpRequest Log Format")
+}
+
+func TestResponseBodyHandler(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := make(map[string]string)
+		resp["foo"] = "bar"
+
+		jsonResp, err := json.Marshal(resp)
+		require.NoError(t, err)
+
+		w.WriteHeader(http.StatusOK)
+		_, err = w.Write(jsonResp)
+		require.NoError(t, err)
+	})
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	out := &bytes.Buffer{}
+	l := NewWithWriter(out)
+	h := l.Handler(handler)
+	h.ServeHTTP(w, r)
+
+	actualLog := struct {
+		RequestBody map[string]interface{} `json:"responseBody"`
+	}{}
+
+	require.NoError(t, json.Unmarshal(out.Bytes(), &actualLog))
+
+	assert.Len(t, actualLog.RequestBody, 1)
+	assert.Equal(t, "bar", actualLog.RequestBody["foo"])
 }

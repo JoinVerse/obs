@@ -1,10 +1,12 @@
 package obs
 
 import (
+	"context"
 	"net/http"
 
 	"cloud.google.com/go/profiler"
 	"github.com/JoinVerse/obs/errtrack"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 // Config ...
@@ -65,16 +67,52 @@ func (o *Observer) Error(msg string, err error) {
 	o.ErrorTags(msg, nil, err)
 }
 
+// Errorf formats and logs an error message to Stderr and send the error to configured trackers.
+func (o *Observer) Errorf(format string, err error, v ...interface{}) {
+	o.ErrorfTags(format, nil, err, v...)
+}
+
 // ErrorTags logs an error message to Stderr and send the error among the tags, to configured trackers.
 func (o *Observer) ErrorTags(msg string, tags map[string]string, err error) {
 	o.errTrack.CaptureError(err, tags, nil)
 	o.log.Error(msg, err)
 }
 
+// ErrorfTags logs an error message to Stderr and send the error among the tags, to configured trackers.
+func (o *Observer) ErrorfTags(format string, tags map[string]string, err error, v ...interface{}) {
+	o.errTrack.CaptureError(err, tags, nil)
+	o.log.Errorf(format, err, v...)
+}
+
 // ErrorTagsAndContext logs an error message to Stderr and send the error among the tags and context, to configured trackers.
 func (o *Observer) ErrorTagsAndContext(msg string, tags map[string]string, context map[string]string, err error) {
 	o.errTrack.CaptureError(err, tags, context)
 	o.log.Error(msg, err)
+}
+
+// ErrorWithSpan logs an error message to Stderr and send the error to configured trackers getting the datadog span from ctx.
+func (o *Observer) ErrorWithSpan(ctx context.Context, msg string, err error) {
+	o.errTrack.CaptureError(err, nil, nil)
+	span, ok := tracer.SpanFromContext(ctx)
+	if !ok {
+		o.log.Error(msg, err)
+		return
+	}
+
+	o.log.Errorf(msg+", span: %v", err, span)
+}
+
+// ErrorfWithSpan formats logs an error message to Stderr and send the error to configured trackers getting the datadog span from ctx.
+func (o *Observer) ErrorfWithSpan(ctx context.Context, format string, err error, v ...interface{}) {
+	o.errTrack.CaptureError(err, nil, nil)
+	span, ok := tracer.SpanFromContext(ctx)
+	if !ok {
+		o.log.Errorf(format, err, v...)
+		return
+	}
+
+	v = append(v, []interface{}{span})
+	o.log.Errorf(format+", span: %v", err, v...)
 }
 
 // HTTPError logs an error message to Stderr and send the error to configured trackers.

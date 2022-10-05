@@ -23,6 +23,10 @@ func (l *Logger) Error(msg string, err error) {
 	l.zl.Err(err).Msg(msg)
 }
 
+func (l *Logger) Errorf(format string, err error, v ...interface{}) {
+	l.zl.Err(err).Msgf(format, v...)
+}
+
 func (l *Logger) Fatal(msg string, err error) {
 	l.zl.Fatal().Err(err).Msg(msg)
 }

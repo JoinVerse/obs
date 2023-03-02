@@ -35,7 +35,7 @@ func New(ctx context.Context, projectID string, serviceName string, serviceVersi
 	return &Exporter{errorClient: errorClient, ctx: ctx, getUserFn: getUserFn}, nil
 }
 
-// Close shutdowns the google cloud error tracker.
+// Close shutdowns the Google cloud error tracker.
 func (e *Exporter) Close() {
 	_ = e.errorClient.Close()
 }

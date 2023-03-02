@@ -151,7 +151,7 @@ type idKey struct{}
 // RequestIDHeaderHandler adds given header from request's header as a field to
 // the context's logger using fieldKey as field key. Returns a handler setting a unique
 // id to the request which can be gathered using IDFromRequest(req). If the header does
-// not exists this generated id is added as a field to the logger using the passed
+// not exist this generated id is added as a field to the logger using the passed
 // fieldKey as field name. The id is also added as a response header if the headerName
 // is not empty.
 //

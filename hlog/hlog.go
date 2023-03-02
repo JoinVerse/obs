@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -113,10 +112,10 @@ func RequestBodyHandler(fieldKey string) func(next http.Handler) http.Handler {
 					// Read the content
 					var bodyBytes []byte
 					if r.Body != nil {
-						bodyBytes, _ = ioutil.ReadAll(r.Body)
+						bodyBytes, _ = io.ReadAll(r.Body)
 					}
 					// Restore the io.ReadCloser to its original state
-					r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+					r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 					log.UpdateContext(
 						func(c zerolog.Context) zerolog.Context {
 							// Use the content

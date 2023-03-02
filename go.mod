@@ -7,7 +7,7 @@ require (
 	github.com/getsentry/sentry-go v0.11.0
 	github.com/rs/xid v1.4.0
 	github.com/rs/zerolog v1.23.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.8.2
 )
 
 require (
@@ -29,5 +29,5 @@ require (
 	google.golang.org/genproto v0.0.0-20210222152913-aa3ee6e6a81c // indirect
 	google.golang.org/grpc v1.35.0 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

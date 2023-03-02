@@ -26,7 +26,7 @@ func main() {
 
 	errorHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		err := fmt.Errorf("main: ups, something wrong happend with the request")
-		observer.HttpError(r, err) // Report error to provider
+		observer.HTTPError(r, err) // Report error to provider
 
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "ups\n")

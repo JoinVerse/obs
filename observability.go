@@ -72,7 +72,7 @@ func (o *Observer) ErrorTags(msg string, tags map[string]string, err error) {
 }
 
 // ErrorTagsAndContext logs an error message to Stderr and send the error among the tags and context, to configured trackers.
-func (o *Observer) ErrorTagsAndContext(msg string, tags map[string]string, context map[string]string, err error) {
+func (o *Observer) ErrorTagsAndContext(msg string, tags map[string]string, context map[string]interface{}, err error) {
 	o.errTrack.CaptureError(err, tags, context)
 	o.log.Error(msg, err)
 }
@@ -89,7 +89,7 @@ func (o *Observer) HttpErrorTags(r *http.Request, tags map[string]string, err er
 }
 
 // HttpErrorTagsAndContext logs an error message to Stderr and send the error among the tags, to configured trackers.
-func (o *Observer) HttpErrorTagsAndContext(r *http.Request, tags map[string]string, context map[string]string, err error) {
+func (o *Observer) HttpErrorTagsAndContext(r *http.Request, tags map[string]string, context map[string]interface{}, err error) {
 	o.errTrack.CaptureHttpError(err, r, tags, context)
 	o.log.Error("", err)
 }

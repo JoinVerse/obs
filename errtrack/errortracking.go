@@ -31,8 +31,8 @@ type ErrorTracker struct {
 
 // errorExporter defines the interface to export errors to providers
 type errorExporter interface {
-	CaptureError(err error, tags map[string]string, context map[string]string)
-	CaptureHttpError(err error, r *http.Request, tags map[string]string, context map[string]string)
+	CaptureError(err error, tags map[string]string, context map[string]interface{})
+	CaptureHttpError(err error, r *http.Request, tags map[string]string, context map[string]interface{})
 	Close()
 }
 
@@ -68,14 +68,14 @@ func (e *ErrorTracker) InitGoogleCloudErrorReporting(config GoogleCloudErrorRepo
 }
 
 // CaptureError sends error to all other error trackers.
-func (e *ErrorTracker) CaptureError(err error, tags map[string]string, context map[string]string) {
+func (e *ErrorTracker) CaptureError(err error, tags map[string]string, context map[string]interface{}) {
 	for _, e := range e.errorExporters {
 		e.CaptureError(err, tags, context)
 	}
 }
 
 // CaptureHttpError sends error to all other error trackers.
-func (e *ErrorTracker) CaptureHttpError(err error, r *http.Request, tags map[string]string, context map[string]string) {
+func (e *ErrorTracker) CaptureHttpError(err error, r *http.Request, tags map[string]string, context map[string]interface{}) {
 	for _, e := range e.errorExporters {
 		e.CaptureHttpError(err, r, tags, context)
 	}

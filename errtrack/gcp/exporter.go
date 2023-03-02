@@ -41,7 +41,7 @@ func (e *Exporter) Close() {
 }
 
 // CaptureError send error to Google Cloud's Stack Driver.
-func (e *Exporter) CaptureError(err error, tags map[string]string, context map[string]string) {
+func (e *Exporter) CaptureError(err error, tags map[string]string, context map[string]interface{}) {
 	e.errorClient.Report(errorreporting.Entry{
 		Error: err,
 	})
@@ -49,7 +49,7 @@ func (e *Exporter) CaptureError(err error, tags map[string]string, context map[s
 }
 
 // CaptureHttpError send error to Google Cloud's Stack Driver.
-func (e *Exporter) CaptureHttpError(err error, r *http.Request, tags map[string]string, context map[string]string) {
+func (e *Exporter) CaptureHttpError(err error, r *http.Request, tags map[string]string, context map[string]interface{}) {
 	e.errorClient.Report(errorreporting.Entry{
 		Error: err,
 		Req:   r,

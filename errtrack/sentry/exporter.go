@@ -1,7 +1,7 @@
 package sentry
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -36,7 +36,7 @@ func (e *Exporter) Close() {
 }
 
 // CaptureError send error to Sentry.
-func (e *Exporter) CaptureError(err error, tags map[string]string, context map[string]string) {
+func (e *Exporter) CaptureError(err error, tags map[string]string, context map[string]interface{}) {
 	sentry.WithScope(func(scope *sentry.Scope) {
 		scope.SetTags(tags)
 		scope.SetContext("context", context)
@@ -45,14 +45,14 @@ func (e *Exporter) CaptureError(err error, tags map[string]string, context map[s
 }
 
 // CaptureHttpError send error to Sentry.
-func (e *Exporter) CaptureHttpError(err error, r *http.Request, tags map[string]string, context map[string]string) {
+func (e *Exporter) CaptureHttpError(err error, r *http.Request, tags map[string]string, context map[string]interface{}) {
 	user := e.getUser(r)
 	sentry.WithScope(func(scope *sentry.Scope) {
 		scope.SetRequest(r)
-		// Adds r.Body explicitly because setRequest only set it at same time is read
-		// so you MUST calls SetRequest before read the body
+		// Adds r.Body explicitly because setRequest only set it at same time is read,
+		// so you MUST call SetRequest before read the body
 		if r != nil && r.Body != nil && r.Body != http.NoBody {
-			if bodyBytes, err := ioutil.ReadAll(r.Body); err == nil {
+			if bodyBytes, err := io.ReadAll(r.Body); err == nil {
 				scope.SetRequestBody(bodyBytes)
 			}
 		}

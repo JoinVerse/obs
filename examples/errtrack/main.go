@@ -19,6 +19,6 @@ func main() {
 	// You can use the noopExporter exporter for testing purposes, it does nothing
 	noopExporter := noop.New()
 	defer noopExporter.Close()
-	noopExporter.CaptureError(err, map[string]string{"os": "Darwin"}, map[string]string{"body": "{'ola':'ola2'}"})
+	noopExporter.CaptureError(err, map[string]string{"os": "Darwin"}, map[string]interface{}{"body": "{'ola':'ola2'}"})
 
 }

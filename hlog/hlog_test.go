@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -61,7 +61,7 @@ type httpTestHandler struct{}
 
 func (h *httpTestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Body != nil && r.Body != http.NoBody {
-		body, _ := ioutil.ReadAll(r.Body)
+		body, _ := io.ReadAll(r.Body)
 		defer r.Body.Close()
 		fmt.Println("body: ", string(body))
 	}
@@ -75,7 +75,7 @@ func TestBodyHandler(t *testing.T) {
 	assert.Nil(t, err)
 	r := &http.Request{
 		URL:  &url.URL{Path: "/"},
-		Body: ioutil.NopCloser(bytes.NewBuffer(expectedLogBody)),
+		Body: io.NopCloser(bytes.NewBuffer(expectedLogBody)),
 	}
 
 	httpTestHandler := &httpTestHandler{}

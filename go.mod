@@ -1,6 +1,6 @@
 module github.com/JoinVerse/obs
 
-go 1.17
+go 1.20
 
 require (
 	cloud.google.com/go v0.78.0

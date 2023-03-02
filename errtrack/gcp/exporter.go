@@ -35,21 +35,21 @@ func New(ctx context.Context, projectID string, serviceName string, serviceVersi
 	return &Exporter{errorClient: errorClient, ctx: ctx, getUserFn: getUserFn}, nil
 }
 
-// Close shutdowns the google cloud error tracker.
+// Close shutdowns the Google cloud error tracker.
 func (e *Exporter) Close() {
 	_ = e.errorClient.Close()
 }
 
 // CaptureError send error to Google Cloud's Stack Driver.
-func (e *Exporter) CaptureError(err error, tags map[string]string, context map[string]string) {
+func (e *Exporter) CaptureError(err error, tags map[string]string, context map[string]interface{}) {
 	e.errorClient.Report(errorreporting.Entry{
 		Error: err,
 	})
 	e.errorClient.Flush()
 }
 
-// CaptureHttpError send error to Google Cloud's Stack Driver.
-func (e *Exporter) CaptureHttpError(err error, r *http.Request, tags map[string]string, context map[string]string) {
+// CaptureHTTPError send error to Google Cloud's Stack Driver.
+func (e *Exporter) CaptureHTTPError(err error, r *http.Request, tags map[string]string, context map[string]interface{}) {
 	e.errorClient.Report(errorreporting.Entry{
 		Error: err,
 		Req:   r,

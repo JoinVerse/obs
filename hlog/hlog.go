@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -113,10 +112,10 @@ func RequestBodyHandler(fieldKey string) func(next http.Handler) http.Handler {
 					// Read the content
 					var bodyBytes []byte
 					if r.Body != nil {
-						bodyBytes, _ = ioutil.ReadAll(r.Body)
+						bodyBytes, _ = io.ReadAll(r.Body)
 					}
 					// Restore the io.ReadCloser to its original state
-					r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+					r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 					log.UpdateContext(
 						func(c zerolog.Context) zerolog.Context {
 							// Use the content
@@ -152,7 +151,7 @@ type idKey struct{}
 // RequestIDHeaderHandler adds given header from request's header as a field to
 // the context's logger using fieldKey as field key. Returns a handler setting a unique
 // id to the request which can be gathered using IDFromRequest(req). If the header does
-// not exists this generated id is added as a field to the logger using the passed
+// not exist this generated id is added as a field to the logger using the passed
 // fieldKey as field name. The id is also added as a response header if the headerName
 // is not empty.
 //

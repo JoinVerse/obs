@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go v0.78.0
 	github.com/getsentry/sentry-go v0.18.0
 	github.com/rs/xid v1.4.0
-	github.com/rs/zerolog v1.23.0
+	github.com/rs/zerolog v1.29.0
 	github.com/stretchr/testify v1.8.2
 )
 
@@ -17,6 +17,8 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/pprof v0.0.0-20210122040257-d980be63207e // indirect
 	github.com/googleapis/gax-go/v2 v2.0.5 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.opencensus.io v0.22.5 // indirect
 	golang.org/x/net v0.0.0-20221002022538-bcab6841153b // indirect

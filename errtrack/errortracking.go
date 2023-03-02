@@ -32,7 +32,7 @@ type ErrorTracker struct {
 // errorExporter defines the interface to export errors to providers
 type errorExporter interface {
 	CaptureError(err error, tags map[string]string, context map[string]interface{})
-	CaptureHttpError(err error, r *http.Request, tags map[string]string, context map[string]interface{})
+	CaptureHTTPError(err error, r *http.Request, tags map[string]string, context map[string]interface{})
 	Close()
 }
 
@@ -74,10 +74,10 @@ func (e *ErrorTracker) CaptureError(err error, tags map[string]string, context m
 	}
 }
 
-// CaptureHttpError sends error to all other error trackers.
-func (e *ErrorTracker) CaptureHttpError(err error, r *http.Request, tags map[string]string, context map[string]interface{}) {
+// CaptureHTTPError sends error to all other error trackers.
+func (e *ErrorTracker) CaptureHTTPError(err error, r *http.Request, tags map[string]string, context map[string]interface{}) {
 	for _, e := range e.errorExporters {
-		e.CaptureHttpError(err, r, tags, context)
+		e.CaptureHTTPError(err, r, tags, context)
 	}
 }
 

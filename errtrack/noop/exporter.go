@@ -13,8 +13,8 @@ func New() *Exporter {
 // CaptureError send error to nowhere.
 func (*Exporter) CaptureError(err error, tags map[string]string, context map[string]interface{}) {}
 
-// CaptureHttpError send error to nowhere.
-func (*Exporter) CaptureHttpError(err error, r http.Request, tags map[string]string, context map[string]interface{}) {
+// CaptureHTTPError send error to nowhere.
+func (*Exporter) CaptureHTTPError(err error, r http.Request, tags map[string]string, context map[string]interface{}) {
 }
 
 // Close does nothing.

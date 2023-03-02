@@ -44,8 +44,8 @@ func (e *Exporter) CaptureError(err error, tags map[string]string, context map[s
 	})
 }
 
-// CaptureHttpError send error to Sentry.
-func (e *Exporter) CaptureHttpError(err error, r *http.Request, tags map[string]string, context map[string]interface{}) {
+// CaptureHTTPError send error to Sentry.
+func (e *Exporter) CaptureHTTPError(err error, r *http.Request, tags map[string]string, context map[string]interface{}) {
 	user := e.getUser(r)
 	sentry.WithScope(func(scope *sentry.Scope) {
 		scope.SetRequest(r)

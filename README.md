@@ -36,7 +36,7 @@ func main() {
 
 This module also provides functionality to be used with `net/http`. See how to use it [here](github.com/JoinVerse/obs/examples/http/main.go)
 
-- `errtrack.CaptureHttpError` capture requests information along with the user id if `X-User-ID` header has being set. Also `context` is used to send more context about the error there you can send until 8kb of data.
+- `errtrack.CaptureHTTPError` capture requests information along with the user id if `X-User-ID` header has being set. Also `context` is used to send more context about the error there you can send until 8kb of data.
 - `htop.Logger` is a middleware that logs end of each request, along with some useful data about what was requested, 
 what the response status was, and how long it took to return.
 

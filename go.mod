@@ -8,7 +8,7 @@ require (
 	github.com/getsentry/sentry-go v0.19.0
 	github.com/rs/xid v1.5.0
 	github.com/rs/zerolog v1.29.1
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 )
 
 require (

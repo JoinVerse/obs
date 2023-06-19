@@ -5,7 +5,7 @@ go 1.20
 require (
 	cloud.google.com/go/errorreporting v0.3.0
 	cloud.google.com/go/profiler v0.3.1
-	github.com/getsentry/sentry-go v0.20.0
+	github.com/getsentry/sentry-go v0.22.0
 	github.com/rs/xid v1.5.0
 	github.com/rs/zerolog v1.29.1
 	github.com/stretchr/testify v1.8.3
